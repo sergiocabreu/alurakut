@@ -1,12 +1,21 @@
 import MainGrid from '../src/components/MainGrid';
 import Box from '../src/components/Box'
-import { AlurakutMenu, OrkutNostalgicIconSet } from '../src/components/lib/AluraKutCommons';
+import { AlurakutMenu, AlurakutProfileSidebarMenuDefault, OrkutNostalgicIconSet } from '../src/components/lib/AluraKutCommons';
 import { ProfileRelationsBoxWrapper } from '../src/components/ProfileRelations';
 
 function ProfileSideBar(propriedades) {
   return (
     <Box>
       <img src={`https://github.com/${propriedades.gitHubUser}.png`} style={{borderRadius: '8px'}}/>
+      <hr/>
+      <p>
+        <a className="boxLink" href={`https://github.com/${propriedades.gitHubUser}`}>
+          @{propriedades.gitHubUser}
+        </a>
+      </p>
+      <hr/>
+
+      <AlurakutProfileSidebarMenuDefault />
     </Box>
   );
 }
@@ -19,7 +28,9 @@ export default function Home() {
     'esmayk',
     'ivancrp',
     'marcelodsa',
-    'eduardo9200'
+    'eduardo9200',
+    'rafaeldecasstro',
+    'sergiocabreu'
   ];
 
 
@@ -37,6 +48,30 @@ export default function Home() {
             </h1>
 
             <OrkutNostalgicIconSet />
+          </Box>
+
+          <Box>
+            <h2 className="subTitle">O que você deseja fazer?</h2>
+
+            <form onSubmit={ (event) => event.preventDefault() }>
+              <div>
+                <input 
+                  type="text"
+                  placeholder="Qual vai ser o nome da sua comunidade?" 
+                  name="title" 
+                  arial-label="Qual vai ser o nome da sua comunidade?"/>
+              </div>
+              <div>
+                <input 
+                  type="text"
+                  placeholder="Coloque uma URL para usarmos de capa" 
+                  name="name" 
+                  arial-label="Coloque uma URL para usarmos de capa"/>
+              </div>              
+              <button>
+                Criar comunidade
+              </button>
+            </form>
           </Box>        
         </div>
         <div className="profileRelationsArea" style={{ gridArea: 'profileRelationsArea' }}>
