@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import MainGrid from '../src/components/MainGrid';
 import Box from '../src/components/Box'
 import { AlurakutMenu, AlurakutProfileSidebarMenuDefault, OrkutNostalgicIconSet } from '../src/components/lib/AluraKutCommons';
@@ -28,6 +28,7 @@ export default function Home() {
     title: 'Eu odeio acordar cedo',
     image: 'https://alurakut.vercel.app/capa-comunidade-01.jpg'
   }]);
+  const [seguidores, setSeguidores] = useState([]);
 
   const gitHubUser = 'sergiocabreu';
   const pessoasFavoritas = [
@@ -38,6 +39,12 @@ export default function Home() {
     'eduardo9200',
     'rafaeldecasstro',
   ];
+
+  useEffect( () => {
+    fetch('https://api.github.com/users/sergiocabreu/followers')
+    .then(r => {return r.json()})
+    .then(r => setSeguidores(r));
+  }, [])
 
 
   return (
@@ -99,6 +106,7 @@ export default function Home() {
         <div className="profileRelationsArea" style={{ gridArea: 'profileRelationsArea' }}>
 
           <ProfileRelationsBoxWrapper>
+                {seguidores.length}
               <h2 className="smallTitle">
                 Comunidades ({comunidades.length})
               </h2>
