@@ -32,7 +32,7 @@ function ProfileRelationsBox({titulo, itens}) {
           return (
             <li key={item.id}>
               <a href={item.link}>
-                <img src={item.image}/>
+                <img src={item.imageUrl}/>
                 <span>{item.title}</span>
               </a>
             </li>
@@ -62,6 +62,7 @@ export default function Home() {
   ];
 
   useEffect( () => {
+
     fetch('https://api.github.com/users/sergiocabreu/followers')
         .then(r => {return r.json()})
         .then(git => {
@@ -70,7 +71,7 @@ export default function Home() {
                 id: seguidor.login,
                 link: seguidor.html_url,
                 title: seguidor.login,
-                image: seguidor.avatar_url
+                imageUrl: seguidor.avatar_url
               }
           });
           setSeguidores(novosSeguidores);
@@ -88,22 +89,21 @@ export default function Home() {
         'Accept': 'application/json'
       },
       body: JSON.stringify({"query": `query {
-                                                allCommunities {
-                                                  id
-                                                  title
-                                                  image: imageUrl
-                                                }
+                                        allCommunities {
+                                          id
+                                          title
+                                          imageUrl
+                                        }
                                       }
       `})
-      
     })
-    
     .then( (resposta) => resposta.json())
     .then( (resposta) => {
       const novasComunidades = resposta.data.allCommunities;
       setComunidades(novasComunidades);
     });
-  });
+
+  }, []);
 
 
   return (
@@ -130,14 +130,28 @@ export default function Home() {
 
                 const dadosFormulario = new FormData(event.target);
 
+                const urlImage = dadosFormulario.get('image') ? dadosFormulario.get('image') : `https://picsum.photos/200/300?random=${new Date().toTimeString()}`;
+                
                 const comunidade = {
-                  id: new Date().toISOString(),
                   title: dadosFormulario.get('title'),
                   link: dadosFormulario.get('link'),
-                  image: `https://picsum.photos/200/300?random=${new Date().toTimeString()}`
+                  imageUrl: urlImage,
+                  creatorSlug: gitHubUser
                 };
 
-                setComunidades([...comunidades, comunidade]);
+                fetch('/api/comunidades', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify(comunidade)
+                }).then(async (response) => {
+                      const dados = await response.json();
+                      const comunidade = dados.registroCriado;
+                      const novasComunidades = [...comunidades, comunidade];
+                      setComunidades(novasComunidades);
+                });
+
                 } }>
                 <div>
                   <input 
@@ -152,7 +166,15 @@ export default function Home() {
                     placeholder="Coloque o link da comunidade" 
                     name="link" 
                     arial-label="Coloque o link da comunidade"/>
-                </div>              
+                </div>
+                <div>
+                  <input 
+                    type="text"
+                    name="image"
+                    placeholder="Coloque o link da capa"
+                    arial-label="Coloque o link da capa"
+                  />
+                </div>                
                 <button>
                   Criar comunidade
                 </button>
