@@ -22,7 +22,6 @@ function ProfileSideBar(propriedades) {
 }
 
 function ProfileRelationsBox({titulo, itens}) {
-  console.log(itens);
   return (
     <>
       <h2 className="smallTitle">
@@ -48,11 +47,7 @@ function ProfileRelationsBox({titulo, itens}) {
 
 export default function Home() {
   
-  const [comunidades, setComunidades] = useState([{
-    id: new Date().toISOString(),
-    title: 'Eu odeio acordar cedo',
-    image: 'https://alurakut.vercel.app/capa-comunidade-01.jpg'
-  }]);
+  const [comunidades, setComunidades] = useState([]);
 
   const [seguidores, setSeguidores] = useState([]);
 
@@ -72,7 +67,7 @@ export default function Home() {
         .then(git => {
             const novosSeguidores = git.map( seguidor => { 
               return {
-                id: new Date().toISOString(),
+                id: seguidor.login,
                 link: seguidor.html_url,
                 title: seguidor.login,
                 image: seguidor.avatar_url
@@ -82,6 +77,33 @@ export default function Home() {
         }
     );
   }, [])
+
+  useEffect( () => {
+    fetch('https://graphql.datocms.com', 
+    {
+      method: 'POST',
+      headers: {
+        'Authorization': 'f7f95b575bd7a6d6fc54383c1ed032',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({"query": `query {
+                                                allCommunities {
+                                                  id
+                                                  title
+                                                  image: imageUrl
+                                                }
+                                      }
+      `})
+      
+    })
+    
+    .then( (resposta) => resposta.json())
+    .then( (resposta) => {
+      const novasComunidades = resposta.data.allCommunities;
+      setComunidades(novasComunidades);
+    });
+  });
 
 
   return (
