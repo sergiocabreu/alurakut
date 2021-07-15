@@ -21,6 +21,31 @@ function ProfileSideBar(propriedades) {
   );
 }
 
+function ProfileRelationsBox({titulo, itens}) {
+  console.log(itens);
+  return (
+    <>
+      <h2 className="smallTitle">
+        {titulo} ({itens.length})
+      </h2>
+      <ul> {
+        itens.map((item)=> {
+          return (
+            <li key={item.id}>
+              <a href={item.link}>
+                <img src={item.image}/>
+                <span>{item.title}</span>
+              </a>
+            </li>
+          )
+        })
+      }
+      </ul>
+    </>
+
+  );
+}
+
 export default function Home() {
   
   const [comunidades, setComunidades] = useState([{
@@ -28,6 +53,7 @@ export default function Home() {
     title: 'Eu odeio acordar cedo',
     image: 'https://alurakut.vercel.app/capa-comunidade-01.jpg'
   }]);
+
   const [seguidores, setSeguidores] = useState([]);
 
   const gitHubUser = 'sergiocabreu';
@@ -42,8 +68,19 @@ export default function Home() {
 
   useEffect( () => {
     fetch('https://api.github.com/users/sergiocabreu/followers')
-    .then(r => {return r.json()})
-    .then(r => setSeguidores(r));
+        .then(r => {return r.json()})
+        .then(git => {
+            const novosSeguidores = git.map( seguidor => { 
+              return {
+                id: new Date().toISOString(),
+                link: seguidor.html_url,
+                title: seguidor.login,
+                image: seguidor.avatar_url
+              }
+          });
+          setSeguidores(novosSeguidores);
+        }
+    );
   }, [])
 
 
@@ -51,7 +88,6 @@ export default function Home() {
     <> 
       <AlurakutMenu githubUser={gitHubUser}/>
       <MainGrid>
-
         <div className="profileArea" style={{ gridArea: 'profileArea' }}>
           <ProfileSideBar gitHubUser={gitHubUser}/>
         </div>
@@ -61,7 +97,6 @@ export default function Home() {
             <h1>
               Bem vindo(a)
             </h1>
-
             <OrkutNostalgicIconSet />
           </Box>
 
@@ -104,46 +139,16 @@ export default function Home() {
         </div>
 
         <div className="profileRelationsArea" style={{ gridArea: 'profileRelationsArea' }}>
-
           <ProfileRelationsBoxWrapper>
-                {seguidores.length}
-              <h2 className="smallTitle">
-                Comunidades ({comunidades.length})
-              </h2>
-              <ul>
-              {
-                comunidades.map((itemAtual)=> {
-                  return (
-                    <li key={itemAtual.id}>
-                      <a href={itemAtual.link}>
-                        <img src={itemAtual.image}/>
-                        <span>{itemAtual.title}</span>
-                      </a>
-                    </li>
-                  )
-                })
-              }
-              </ul>
+              <ProfileRelationsBox titulo="Seguidores" itens={seguidores}/>
           </ProfileRelationsBoxWrapper>
 
           <ProfileRelationsBoxWrapper>
-            <h2 className="smallTitle">
-              Pessoas da comunidade ({pessoasFavoritas.length})
-            </h2>
-            <ul>
-            {
-              pessoasFavoritas.map((itemAtual)=> {
-                return (
-                  <li key={itemAtual}>
-                    <a href={`users/${itemAtual}`}>
-                      <img src={`https://github.com/${itemAtual}.png`}/>
-                      <span>{itemAtual}</span>
-                    </a>
-                  </li>
-                )
-              })
-            }
-            </ul>
+            <ProfileRelationsBox titulo="Comunidades" itens={comunidades}/>
+          </ProfileRelationsBoxWrapper>
+
+          <ProfileRelationsBoxWrapper>
+            <ProfileRelationsBox titulo="Pessoas da comunidade" itens={pessoasFavoritas}/>
           </ProfileRelationsBoxWrapper>
         </div>
       </MainGrid>
