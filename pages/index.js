@@ -200,7 +200,7 @@ export async function getServerSideProps(context) {
   })
   .then( response => response.json())
 
-  if (isAuthenticated) {
+  if (isAuthenticated || !token) {
     return {
       redirect: {
         destination: '/login',
