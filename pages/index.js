@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import nookies from 'nookies';
+import jwt from 'jsonwebtoken';
 import MainGrid from '../src/components/MainGrid';
 import Box from '../src/components/Box'
 import { AlurakutMenu, AlurakutProfileSidebarMenuDefault, OrkutNostalgicIconSet } from '../src/components/lib/AluraKutCommons';
@@ -31,7 +33,7 @@ function ProfileRelationsBox({titulo, itens}) {
         itens.map((item)=> {
           return (
             <li key={item.id}>
-              <a href={item.link}>
+              <a href={item.link ? item.link : ''}>
                 <img src={item.imageUrl}/>
                 <span>{item.title}</span>
               </a>
@@ -45,25 +47,15 @@ function ProfileRelationsBox({titulo, itens}) {
   );
 }
 
-export default function Home() {
+export default function Home({githubUser}) {
   
   const [comunidades, setComunidades] = useState([]);
 
   const [seguidores, setSeguidores] = useState([]);
 
-  const gitHubUser = 'sergiocabreu';
-  const pessoasFavoritas = [
-    'zacariasgsn',
-    'esmayk',
-    'ivancrp',
-    'marcelodsa',
-    'eduardo9200',
-    'rafaeldecasstro',
-  ];
-
   useEffect( () => {
 
-    fetch('https://api.github.com/users/sergiocabreu/followers')
+    fetch(`https://api.github.com/users/${githubUser}/followers`)
         .then(r => {return r.json()})
         .then(git => {
             const novosSeguidores = git.map( seguidor => { 
@@ -108,10 +100,10 @@ export default function Home() {
 
   return (
     <> 
-      <AlurakutMenu githubUser={gitHubUser}/>
+      <AlurakutMenu githubUser={githubUser}/>
       <MainGrid>
         <div className="profileArea" style={{ gridArea: 'profileArea' }}>
-          <ProfileSideBar gitHubUser={gitHubUser}/>
+          <ProfileSideBar gitHubUser={githubUser}/>
         </div>
 
         <div className="welcomeArea" style={{ gridArea: 'welcomeArea' }}>
@@ -190,12 +182,38 @@ export default function Home() {
           <ProfileRelationsBoxWrapper>
             <ProfileRelationsBox titulo="Comunidades" itens={comunidades}/>
           </ProfileRelationsBoxWrapper>
-
-          <ProfileRelationsBoxWrapper>
-            <ProfileRelationsBox titulo="Pessoas da comunidade" itens={pessoasFavoritas}/>
-          </ProfileRelationsBoxWrapper>
         </div>
       </MainGrid>
     </>
   )
+}
+
+
+export async function getServerSideProps(context) {
+
+  const token = nookies.get(context).USER_TOKEN;
+
+  const { isAuthenticated } = await fetch('https://alurakut.vercel.app/api/auth', {
+    hearders: {
+      Autorization: token
+    }
+  })
+  .then( response => response.json())
+
+  if (isAuthenticated) {
+    return {
+      redirect: {
+        destination: '/login',
+        permanent: false,
+      }
+    }
+  }
+
+  const {githubUser} = jwt.decode(token);
+
+  return {
+    props: {
+      githubUser
+    }
+  };
 }
