@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import {useRouter} from 'next/router';
-import { parseCookies } from 'nookies'
+import nookies from 'nookies';
 
 export default function LoginScreen() {
 
     const router = useRouter();
-    const [githubUser, setgithubUser] = useState();
-
-    const nookies = parseCookies();
+    const [githubUser, setgithubUser] = useState('');
 
   return (
     <main style={{ display: 'flex', flex: 1, alignItems: 'center', justifyContent: 'center' }}>
@@ -31,7 +29,7 @@ export default function LoginScreen() {
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({githubUser: 'sergiocabreu'})
+                    body: JSON.stringify({githubUser: githubUser})
                 }).then( async (resposta) => {
                     const dadosDaResposta = await resposta.json();
                     const token = dadosDaResposta.token;
